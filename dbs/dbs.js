@@ -1,6 +1,8 @@
 const mongoose = require("mongoose")
 
-mongoose.connect("mongodb://localhost:27017/chatbot",{
+const uri = "mongodb+srv://prtcbotdb:12345678JASW@cluster0.v5jln.mongodb.net/CATBOT?retryWrites=true&w=majority"
+
+mongoose.connect(uri,{
     //userCreateIndex:true,
     useNewUrlParser: true,
     useUnifiedTopology : true,
