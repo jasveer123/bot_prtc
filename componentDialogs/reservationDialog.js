@@ -10,6 +10,8 @@ const { summarycard } = require('../Resources/adaptivCard/summarycard')
 
 const { CardFactory } = require('botbuilder');
 
+const {mailto} = require('../email/nodemailer');
+
 //const {store} = require('../controller/ticketcontroller')
 //require("../dbs/dbs")
 //const ticket_schema = require("../models/ticket")
@@ -17,6 +19,8 @@ const { CardFactory } = require('botbuilder');
 
 
 const { DialogSet, DialogTurnStatus } = require('botbuilder-dialogs');
+const SendmailTransport = require("nodemailer/lib/sendmail-transport")
+const mail = require("@sendgrid/mail")
 //const loginCard = require('../Resources/adaptivCard/login.json')
 const CONFIRM_PROMPT = 'CONFIRM_PROMPT'
 const CHOICE_PROMPT = 'CHOICE_PROMPT'
@@ -52,6 +56,7 @@ class reservationDialog extends ComponentDialog {
             this.GetDestination.bind(this),
             this.getDate.bind(this),
             this.getTime.bind(this),
+            this.getmail.bind(this),
             this.confirmStep.bind(this),
             this.summaryStep.bind(this)
 
@@ -133,10 +138,16 @@ class reservationDialog extends ComponentDialog {
         return await step.prompt(DATETIME_PROMPT, 'At what time?')
     }
 
+    async getmail(step){
+        step.values.time = step.result
+        return await step.prompt(TEXT_PROMPT, 'Enter Your mail address')
+    }
+
 
     async confirmStep(step) {
 
-        step.values.time = step.result
+        step.values.mail = step.result
+        
         await step.context.sendActivity({
             text: 'You entered following information',
             attachments: [CardFactory.adaptiveCard(summarycard(step.values.name.toUpperCase(), step.values.date[0].value, step.values.time[0].value, step.values.location.toUpperCase(), step.values.destination.toUpperCase(), step.values.noOfParticipants))]
@@ -160,6 +171,8 @@ class reservationDialog extends ComponentDialog {
                 text: 'reservation done here is ticket',
                 attachments: [CardFactory.adaptiveCard(getreservationcard(step.values.name.toUpperCase(), step.values.date[0].value, step.values.time[0].value, step.values.location.toUpperCase(), step.values.destination.toUpperCase(), step.values.noOfParticipants, detials[0]._id.toUpperCase()))]
             });
+
+            const sendmail = mailto(step.values.name.toUpperCase(), step.values.date[0].value, step.values.time[0].value, step.values.location.toUpperCase(), step.values.destination.toUpperCase(), step.values.noOfParticipants, detials[0]._id.toUpperCase(),step.values.mail)
 
            // const ticket_details = await postid(step)
 

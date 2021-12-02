@@ -49,7 +49,6 @@ router.get("/", async (req, res)=>{
         console.log(req.query)
         const ticket = await ticket_schema.find(req.query)
         const data = res.json(ticket)
-        console.log(data)
     }
     catch(err){
         console.log(err)
